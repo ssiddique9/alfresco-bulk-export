@@ -570,8 +570,8 @@ public class AlfrescoExportDaoImpl implements AlfrescoExportDao
         {
             if(obj instanceof Date)
             {
-                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SSSZ");
-                
+                SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
                 Date date = (Date) obj;
                 returnValue = format.format(date);
                 returnValue = returnValue.substring(0, 26) + ":" + returnValue.substring(26);
