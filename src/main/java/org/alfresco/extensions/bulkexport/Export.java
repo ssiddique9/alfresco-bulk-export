@@ -16,6 +16,8 @@
  */
 package org.alfresco.extensions.bulkexport;
 
+import java.io.IOException;
+
 import org.alfresco.extensions.bulkexport.controler.CacheGeneratedException;
 import org.alfresco.extensions.bulkexport.controler.Engine;
 import org.alfresco.extensions.bulkexport.dao.AlfrescoExportDao;
@@ -23,14 +25,11 @@ import org.alfresco.extensions.bulkexport.dao.AlfrescoExportDaoImpl;
 import org.alfresco.extensions.bulkexport.model.FileFolder;
 import org.alfresco.service.ServiceRegistry;
 import org.alfresco.service.cmr.repository.NodeRef;
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.springframework.extensions.webscripts.AbstractWebScript;
 import org.springframework.extensions.webscripts.WebScriptRequest;
 import org.springframework.extensions.webscripts.WebScriptResponse;
-
-import java.io.IOException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 
 /**
  * This class has a function to start the export process data contained in the repository.
@@ -76,9 +75,7 @@ public class Export extends AbstractWebScript
         boolean exportVersions = false;
         boolean revisionHead = false;
         boolean useNodeCache = false;
-        int nbOfThreads = 1;
-        int exportChunkSize = 10;
-
+        
         if (req.getParameter("ignoreExported") != null)
         {
             if(req.getParameter("ignoreExported").equals("true")) 
@@ -116,27 +113,11 @@ public class Export extends AbstractWebScript
                 useNodeCache = true;
             }
         }
-
-        if (req.getParameter("nbOfThreads") != null)
-        {
-            if(StringUtils.isNumeric(req.getParameter("nbOfThreads")))
-            {
-                nbOfThreads = (int)Integer.parseInt(req.getParameter("nbOfThreads"));
-            }
-        }
-
-        if (req.getParameter("exportChunkSize") != null)
-        {
-            if(StringUtils.isNumeric(req.getParameter("exportChunkSize")))
-            {
-                exportChunkSize = (int)Integer.parseInt(req.getParameter("exportChunkSize"));
-            }
-        }
-
+        
         //init variables
         dao = new AlfrescoExportDaoImpl(this.serviceRegistry);
         fileFolder = new FileFolder(res, base, scapeExported);
-        engine = new Engine(dao, fileFolder, exportVersions, revisionHead, useNodeCache, nbOfThreads, exportChunkSize);
+        engine = new Engine(dao, fileFolder, exportVersions, revisionHead, useNodeCache);
         
         NodeRef nf = null;
 
@@ -165,32 +146,20 @@ public class Export extends AbstractWebScript
             res.getWriter().write("*****************************************************************************************************\n\n\n");
         }
 
-        try {
-            //
-            // writes will not appear until the script is finished, flush does not help
-            //
-            res.getWriter().write("Performed Export with the following Parameters :\n");
-            res.getWriter().write("   export folder   : " + base + "\n");
-            res.getWriter().write("   node to export  : " + nodeRef + "\n");
-            res.getWriter().write("   ignore exported : " + scapeExported + "\n");
-            res.getWriter().write("   export versions : " + exportVersions + "\n");
-            res.getWriter().write("   bulk import revision scheme: " + !revisionHead + "\n");
-            res.getWriter().write("   Nb. of threads: " + nbOfThreads + "\n");
-            res.getWriter().write("   Chunk size: " + exportChunkSize + "\n");
+        //
+        // writes will not appear until the script is finished, flush does not help
+        //
+        res.getWriter().write("Performed Export with the following Parameters :\n"); 
+        res.getWriter().write("   export folder   : " + base + "\n");
+        res.getWriter().write("   node to export  : " + nodeRef + "\n");
+        res.getWriter().write("   ignore exported : " + scapeExported + "\n");
+        res.getWriter().write("   export versions : " + exportVersions + "\n");
+        res.getWriter().write("   bulk import revision scheme: " + !revisionHead +"\n");
 
-            long duration = timer.elapsedTime();
-            res.getWriter().write("Export elapsed time: minutes:" + duration / 60 + " , seconds: " + duration + "\n");
+        long duration = timer.elapsedTime();
+        res.getWriter().write("Export elapsed time: minutes:" + duration/60 + " , seconds: " + duration + "\n"); 
 
-            log.info("Bulk Export finished");
-        }catch (Throwable e){
-            log.error("Error when finishing Export (Reason): " + e.toString() + "\n");
-            e.printStackTrace();
-            res.getWriter().write("*****************************************************************************************************\n");
-            res.getWriter().write("** ERROR occured:\n");
-            res.getWriter().write("** " + e.toString() + "\n");
-            res.getWriter().write("*****************************************************************************************************\n\n\n");
-
-        }
+        log.info("Bulk Export finished");
     }
 
 
