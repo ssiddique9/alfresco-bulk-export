@@ -207,10 +207,11 @@ public class Engine
 
             String headRevision = (String)sortedKeys.get(sortedKeys.size()-1);
 
-            for (String revision : nodes.keySet()) 
+            int versionNumber = 1;
+            for (Object revision : sortedKeys)
             {
                 NodeRefRevision nodeRevision = nodes.get(revision);
-                this.createFile(nodeRef, nodeRevision.node, revision, headRevision == revision);
+                this.createFile(nodeRef, nodeRevision.node, "v"+(versionNumber++), headRevision == revision);
             }
         }
         else
@@ -280,6 +281,7 @@ public class Engine
         if (!revisionHead && isHeadRevision)
         {
             path = this.dao.getPath(headNode);
+            file = headNode;
         }
 
         doCreateFile(file, path);

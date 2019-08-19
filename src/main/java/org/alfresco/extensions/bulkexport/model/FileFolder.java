@@ -29,6 +29,7 @@ import java.util.Set;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.springframework.extensions.webscripts.WebScriptResponse;
+import java.util.regex.Pattern;
 
 
 
@@ -40,6 +41,7 @@ import org.springframework.extensions.webscripts.WebScriptResponse;
  */
 public class FileFolder 
 {
+    final static Pattern PATTERN_VERSION = Pattern.compile(".*[.]v[1-9]+$");
     Log log = LogFactory.getLog(FileFolder.class);
 
     /** {@link String} interface to web page for displaying messages
@@ -156,7 +158,14 @@ public class FileFolder
      */
     private String createXmlFile(String filePath) throws Exception 
     {
-        String fp = filePath + ".metadata.properties.xml";
+        String fp;
+        if(PATTERN_VERSION.matcher(filePath).matches()){
+            int index = filePath.lastIndexOf(".v");
+            fp = filePath.substring(0,index) + ".metadata.properties.xml" + filePath.substring(index);
+        }
+        else {
+            fp = filePath + ".metadata.properties.xml";
+        }
         
         this.createFile(fp);
         
